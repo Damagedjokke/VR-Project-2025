@@ -10,7 +10,51 @@ namespace Robot
 {
     public class RobotArmUnity
     {
-        // Debug toggles - set to true to enable specific debug categories
+        // ========== CONFIGURATION - Adjust these to calibrate controller-to-robot mapping ==========
+
+        // Your position relative to the robot (in degrees):
+        // 0 = Facing robot directly | 90 = Robot's left side | -90 = Robot's right side | 180 = Behind robot
+        private float userPositionAngle = 180;  // Change this single value to adjust your position
+        private bool invertRotation = false;     //Flip the rotation angles (wrist)
+
+        // These are calculated from userPositionAngle
+        private Quaternion gimbalPlacement
+        {
+            get
+            {
+                float angle = userPositionAngle;
+                // Swap left/right sides for correct position mapping
+                if (userPositionAngle == 90)
+                {
+                    angle = -90;
+                }
+                else if (userPositionAngle == -90)
+                {
+                    angle = 90;
+                }
+                return Quaternion.Euler(0, angle, 0);
+            }
+        }
+
+        private Quaternion rotationToRobot
+        {
+            get
+            {
+                float angle = userPositionAngle;
+                if (invertRotation)
+                {
+                    // Flip 180 degrees for wrist rotation only
+                    angle = (angle + 180) % 360;
+                    if (angle > 180) angle -= 360;  // Keep in range -180 to 180
+                }
+                return Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+        }
+
+        // Initial X-axis offset - Compensates for controller pitch angle
+        private float initialXOffset = -50;  // Degrees
+
+        // ========== Debug toggles ==========
         private bool debugInput = true;      // Button presses, controller actions
         private bool debugData = true;       // Force values, vibration data
 
@@ -64,16 +108,12 @@ namespace Robot
             totalRotationsLocalRef,
             normalizedTotalRotLocalRef;
 
-        private Quaternion
-            gimbalPlacement = Quaternion.Euler(0, 180, 0); //gimbalPlacement = Quaternion.Euler(0, -90, 0);Quaternion.Euler(0, -45, 0);
 
 
 
 
 
-        //private Quaternion rotationToRobot = Quaternion.AngleAxis(180, Vector3.forward);
-        private Quaternion rotationToRobot = Quaternion.AngleAxis(-90, Vector3.forward); // Quaternion.AngleAxis(90, Vector3.forward); When placed facing robot opposite side use this. Quaternion.AngleAxis(45, Vector3.forward);
-        private Quaternion xOffsetRotation = Quaternion.Euler(-50, 0, 0);
+        private Quaternion xOffsetRotation;
         private Quaternion yOffsetRotation = Quaternion.identity;
         private float axisAngle = 0.0f;
         private Vector3 posVector;
@@ -115,20 +155,20 @@ namespace Robot
             if (oneTimeSetupBool)
             {
                 //constantControllerRotation = rotationToRobot * Quaternion.Euler(0, 180, 0);
-                initialControllerRotation =  Quaternion.Euler(0, 180, 0);  //This is based on starting position of robot arm. TODO: make dynamic. 
+                initialControllerRotation =  Quaternion.Euler(0, 180, 0);  //This is based on starting position of robot arm. TODO: make dynamic.
                 inverseInitalControllerRotation = Quaternion.Inverse(initialControllerRotation);
-                xOffsetRotation = Quaternion.Euler(controllerPose.transform.rotation.eulerAngles.x, 0, 0);
+                xOffsetRotation = Quaternion.Euler(initialXOffset, 0, 0);
                 //yOffsetRotation = Quaternion.Euler(0, -controllerPose.transform.rotation.eulerAngles.y ,0);
                 totalRotationsLocalRef = initialControllerRotation;
                 previousControllerRotation = initialControllerRotation;
-                
-                
+
+
                 oneTimeSetupBool = false;
             }
 
             if (grabGrip.GetStateDown(handType))
             {
-                xOffsetRotation = Quaternion.Euler(controllerPose.transform.rotation.eulerAngles.x, 0, 0);
+                xOffsetRotation = Quaternion.Euler(initialXOffset, 0, 0);
                 previousControllerPosition = controllerPose.transform.position;
                 previousControllerRotation = controllerPose.transform.rotation * xOffsetRotation * rotationToRobot;
             }

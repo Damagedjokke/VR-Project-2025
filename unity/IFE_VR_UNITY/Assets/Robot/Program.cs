@@ -10,6 +10,9 @@ namespace Robot
 {
     public class Program : MonoBehaviour
     {
+        //Robot IP Configuration - Change this to connect to different robots
+        private static string robotIP = "192.168.56.101";   //School robot: 158.39.162.177  |   School robot (Gripper): 158.39.162.151  |   URSim: 192.168.56.101
+
         // Debug toggles - set to true to enable specific debug categories
         private static bool debugConnectivity = true;     // Connection status, setup, socket events
         private static bool debugData = true;              // Data values, outputs, inputs, forces
@@ -57,7 +60,7 @@ namespace Robot
             
             Ur3.OnSockClosed += Ur3_OnSockClosed;
 
-            isConnected = await Ur3.ConnectAsync("158.39.162.151", 2); //School robot: 158.39.162.177 //School robot (Gripper): 158.39.162.151 //URSim: 192.168.56.101
+            isConnected = await Ur3.ConnectAsync(robotIP, 2); 
             if (isConnected) {
                 if (debugConnectivity) Debug.Log("Successfully connected.");
             } else {
