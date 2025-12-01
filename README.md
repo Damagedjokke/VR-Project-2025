@@ -2,13 +2,12 @@
 Github repo for teleoperated robot arm.
 ## Hardware
 - UR3e & UR16e
-- Meta Quest 3
+- HTC VIVE 1 (VIVE 1 PRO and PRO 2 also works)
 - 2 VR controllers
 - StereoLabs ZED 2 Stereoscopic Camera
 - ~~Intel Realsense D435i~~
 - ~~3 stepper motors~~
 - ~~Custom Gimbal~~
-- ~~HTC VIVE PRO 2 (We are currently testing on 1)~~
 - ~~Raspberry pi 4~~
 - ~~2 VR base stations~~
 ## Plugins/Libraries for Unity/PC (Unity version 2021.3.18f1)
